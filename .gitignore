@@ -3,3 +3,4 @@ node_modules/
 .DS_Store
 *.log
 legalease-34703-firebase-adminsdk-c8iwm-7abfa54524.json
+backup.ts
