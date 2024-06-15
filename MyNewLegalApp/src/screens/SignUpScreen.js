@@ -1,20 +1,38 @@
 import React, { useState } from 'react';
 import { View, Text,TextInput, Button, StyleSheet, ScrollView } from 'react-native';
+import { auth, firestore, createUserWithEmailAndPassword } from '../firebaseConfig';
+
+
 
 function SignUpScreen({ navigation }) {
     const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
+    //const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const handleSignUp = () => {
-        // Placeholder for whatever you want to do with the form data
-        console.log(name, address, phone, email, password, confirmPassword);
-        // Example: navigate back to the home screen after sign up
-        // navigation.navigate('Home');
-    };
+    const handleSignUp = async () => {
+        if (password !== confirmPassword) {
+          alert("Passwords don't match!");
+          return;
+        }
+        try {
+            console.log(auth);   
+          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+          await firestore.collection('users').doc(user.uid).set({
+            name: name,
+            email: email,
+            phone: phone
+          });
+          console.log('User registered with ID:', user.uid);
+          alert("User created successfully!");
+          navigation.navigate('Home');
+        } catch (error) {
+          alert(error.message);
+        }
+      };
 
     return (
         <ScrollView style={styles.container}>
@@ -24,12 +42,6 @@ function SignUpScreen({ navigation }) {
                 placeholder="Enter Full Legal Name"
                 value={name}
                 onChangeText={setName}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Enter Address"
-                value={address}
-                onChangeText={setAddress}
             />
             <TextInput
                 style={styles.input}
