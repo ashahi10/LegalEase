@@ -1,39 +1,42 @@
 import React, { useState } from 'react';
 import { View, Text,TextInput, Button, StyleSheet, ScrollView } from 'react-native';
-import { auth, firestore, createUserWithEmailAndPassword } from '../firebaseConfig';
+import { auth, firestore } from '../firebaseConfig';
+import { createUserWithEmailAndPassword } from 'firebase/auth'; 
+import { useNavigation } from '@react-navigation/native';
 
 
 
-function SignUpScreen({ navigation }) {
+function SignUpScreen() {
     const [name, setName] = useState('');
     //const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigation = useNavigation();
+   
 
     const handleSignUp = async () => {
         if (password !== confirmPassword) {
           alert("Passwords don't match!");
           return;
         }
+        setLoading(true); 
         try {
-            console.log(auth);   
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-          const user = userCredential.user;
-          await firestore.collection('users').doc(user.uid).set({
-            name: name,
-            email: email,
-            phone: phone
-          });
-          console.log('User registered with ID:', user.uid);
-          alert("User created successfully!");
-          navigation.navigate('Home');
-        } catch (error) {
-          alert(error.message);
-        }
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            console.log('User registered with ID:', user.uid);
+            alert("User created successfully!");
+            navigation.navigate('Welcome', { name }); // Navigate to the Welcome screen with user's name
+          } catch (error) {
+            console.error("Signup error:", error);
+            alert(error.message);
+          } finally {
+            setLoading(false); // Stop the loading indicator regardless of the outcome
+          }
       };
-
+  
     return (
         <ScrollView style={styles.container}>
             <Text style={styles.title}>Join us today!</Text>
