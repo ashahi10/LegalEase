@@ -5,7 +5,10 @@ function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text>Home Screen</Text>
-      <Button title="Go to Login" onPress={() => navigation.navigate('Login')} />
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+        <Text style={styles.text}>Login</Text>
+      </TouchableOpacity>
+      
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.text}>Sign Up</Text>
       </TouchableOpacity>
