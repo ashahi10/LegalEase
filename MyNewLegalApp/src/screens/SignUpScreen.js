@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text,TextInput, Button, StyleSheet, ScrollView } from 'react-native';
 import { auth, firestore } from '../firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth'; 
+import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 
 
@@ -15,6 +16,15 @@ function SignUpScreen() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
+
+    const addUserDetails = async (userId, userDetails) => {
+        try {
+            await firestore.collection('users').doc(userId).set(userDetails);
+            console.log('User details added successfully');
+        } catch (error) {
+            console.error('Failed to add user details:', error);
+        }
+    };
    
 
     const handleSignUp = async () => {
@@ -26,8 +36,14 @@ function SignUpScreen() {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+            //store name and phone number in firestore
+            await setDoc(doc(firestore, 'users', user.uid), {
+                name: name,
+                email: email,
+                phone: phone
+            });
             console.log('User registered with ID:', user.uid);
-            alert("User created successfully!");
+            //alert("User created successfully!");
             navigation.navigate('Welcome', { name }); // Navigate to the Welcome screen with user's name
           } catch (error) {
             console.error("Signup error:", error);
