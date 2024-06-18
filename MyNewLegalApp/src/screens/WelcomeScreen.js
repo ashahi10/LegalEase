@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 
 function WelcomeScreen({ route, navigation }) {
+    const name = route.params?.name;   
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Welcome, {route.params.name}!</Text>
