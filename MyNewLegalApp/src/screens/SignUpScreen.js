@@ -17,16 +17,6 @@ function SignUpScreen() {
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
-    const addUserDetails = async (userId, userDetails) => {
-        try {
-            await firestore.collection('users').doc(userId).set(userDetails);
-            console.log('User details added successfully');
-        } catch (error) {
-            console.error('Failed to add user details:', error);
-        }
-    };
-   
-
     const handleSignUp = async () => {
         if (password !== confirmPassword) {
           alert("Passwords don't match!");
