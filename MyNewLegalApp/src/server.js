@@ -3,6 +3,9 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const serviceAccount = require('../legalease-34703-firebase-adminsdk-c8iwm-7abfa54524.json');
+const lawyerRoutes = require('./services_api/lawyers'); // Adjust path as necessary
+
+
 
 
 const app = express();
@@ -11,13 +14,16 @@ const PORT = process.env.PORT || 8081;
 app.use(bodyParser.json());
 app.use(cors());
 
+
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
+
+app.use('/api', lawyerRoutes);
+console.log(lawyerRoutes);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -54,21 +60,7 @@ app.post('/signup', (req, res) => {
       res.status(500).send(error.message);
   });
 });
-// POST /login
-app.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  // In practice, you'll use Firebase's client-side authentication to verify passwords
-  admin.auth().getUserByEmail(email)
-  .then(userRecord => {
-      // Password verification should be handled client-side
-      console.log('User fetching successful:', userRecord.uid);
-      res.status(200).send('User authenticated');
-  })
-  .catch(error => {
-      console.error('User does not exist:', error);
-      res.status(404).send(error.message);
-  });
-});
+
 // POST /login
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
@@ -84,9 +76,7 @@ app.post('/login', (req, res) => {
       res.status(404).send(error.message);
   });
 });
-// import React from 'react';
-// import AppNavigator from './AppNavigator';
 
-// export default function App() {
-//   return <AppNavigator />;
-// }
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

@@ -57,11 +57,6 @@ function WelcomeScreen({ route, navigation }) {
                     ))}
                 </ScrollView>
             </View>
-
-
-
-
-
         </View>
   );
 }
