@@ -12,9 +12,23 @@ import TaxIcon from '../../assets/Tax-law.png';
 import EstatePlanningIcon from '../../assets/estate-law.png';
 import BankruptcyIcon from '../../assets/bankrupt-law.png';
 import EnvironmentIcon from '../../assets/environment-law.png';
+import  { useState, useEffect } from 'react';
 
 function WelcomeScreen({ route, navigation }) {
     const name = route.params?.name;
+    const [lawyers, setLawyers] = useState([]); // State to store lawyer data
+    useEffect(() => {
+        fetch('http://localhost:8081/api/lawyers/random')  // Make sure URL is correct
+          .then(response => response.json())
+          .then(data => {
+            console.log(data);  // Check what data you received
+            setLawyers(data);
+          })
+          .catch(error => {
+            console.error('Failed to fetch lawyers:', error);
+            setLawyers([]);  // Ensure lawyers is always an array
+          });
+      }, []);
 
     const categories = [
       { name: "Family ", color: "#9CAFEE",icon: FamilyLawIcon },
@@ -57,6 +71,26 @@ function WelcomeScreen({ route, navigation }) {
                     ))}
                 </ScrollView>
             </View>
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Featured Lawyers</Text>
+                <ScrollView vertical showsVerticalScrollIndicator={true} style={{flex: 1}}>
+                {lawyers && lawyers.length > 0 ? (
+                lawyers.map((lawyer, index) => (
+                <View key={index} style={styles.lawyerCard}>
+                <Image source={{ uri: lawyer.PhotoURL }} style={styles.lawyerImage} />
+                <View style={styles.lawyerInfo}>
+                 <Text style={styles.lawyerName}>{lawyer.FirstName} {lawyer.LastName}</Text>
+                    <Text style={styles.lawyerSpecialization}>{lawyer.Specialization}</Text>
+                <Text style={styles.lawyerDescription}>{lawyer.Experience}</Text>
+            </View>
+        </View>
+      ))
+    ) : (
+      <Text>No lawyers found</Text>
+    )}
+  </ScrollView>
+</View>
+
         </View>
   );
 }
@@ -102,8 +136,10 @@ const styles = StyleSheet.create({
       elevation: 2,
   },
   section: {
+        flex: 1,
         marginBottom: 16,
         marginTop: 16,
+        overflow: 'hidden'
     },
     sectionTitle: {
         fontSize: 20,
@@ -130,6 +166,39 @@ const styles = StyleSheet.create({
     categoryText: {
         fontSize: 16,
         textAlign: 'center',
+    },
+    lawyerCard: {
+        flexDirection: 'row',
+        padding: 10,
+        marginBottom: 10,
+        
+        backgroundColor: '#f9f9f9',
+        borderRadius: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1,
+    },
+    lawyerImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+    },
+    lawyerInfo: {
+        flex: 1,
+        paddingLeft: 10,
+    },
+    lawyerName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    lawyerSpecialization: {
+        fontSize: 16,
+        color: '#666',
+    },
+    lawyerDescription: {
+        fontSize: 14,
+        color: '#999',
     },
 });
 
