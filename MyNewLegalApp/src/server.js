@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const multer = require('multer');
 const admin = require('firebase-admin');
 const serviceAccount = require('../legalease-34703-firebase-adminsdk-c8iwm-7abfa54524.json');
 const lawyerRoutes = require('./services_api/lawyers'); // Adjust path as necessary
@@ -10,6 +11,7 @@ const lawyerRoutes = require('./services_api/lawyers'); // Adjust path as necess
 
 const app = express();
 const PORT = process.env.PORT || 8081;
+
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -23,10 +25,15 @@ app.get('/', (req, res) => {
 
 
 app.use('/api', lawyerRoutes);
-console.log(lawyerRoutes);
+//console.log(lawyerRoutes);
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: "legalease-34703.appspot.com"
+});
+const bucket = admin.storage().bucket();
+const upload = multer({
+  storage: multer.memoryStorage()
 });
 const db = admin.firestore();
 db.collection('test').add({ hello: 'world' })
@@ -77,6 +84,42 @@ app.post('/login', (req, res) => {
   });
 });
 
+//Image storage and retirve firebase
+app.post('/api/upload-profile-image', upload.single('profileImage'), async (req, res) => {
+  const { lawyerId } = req.body;
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
+  const blob = bucket.file(`lawyer-profiles/${lawyerId}.jpg`);
+  const blobStream = blob.createWriteStream({
+    metadata: {
+      contentType: req.file.mimetype,
+    },
+  });
+
+  blobStream.on('error', (err) => {
+    res.status(500).send({ message: err.message });
+  });
+
+  blobStream.on('finish', async () => {
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+    // Update lawyer record in MySQL database with image URL
+    const query = 'UPDATE lawyers SET profilePictureUrl = ? WHERE id = ?';
+    db.query(query, [publicUrl, lawyerId], (err, results) => {
+      if (err) {
+        res.status(500).send({ message: err.message });
+      } else {
+        res.status(200).send({ message: 'File uploaded successfully', url: publicUrl });
+      }
+    });
+  });
+
+  blobStream.end(req.file.buffer);
+});
+
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, Button, TextInput, ScrollView, Image, FlatList } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FamilyLawIcon from '../../assets/family-law.png';
 import CriminalLawIcon from '../../assets/crime-law.png';
@@ -21,7 +21,7 @@ function WelcomeScreen({ route, navigation }) {
         fetch('http://localhost:8081/api/lawyers/random')  // Make sure URL is correct
           .then(response => response.json())
           .then(data => {
-            console.log(data);  // Check what data you received
+            //console.log(data);  // Check what data you received
             setLawyers(data);
           })
           .catch(error => {
@@ -54,7 +54,7 @@ function WelcomeScreen({ route, navigation }) {
                     <Ionicons name="settings-outline" size={24} color="black" />
                 </View>
             </View>
-
+            <ScrollView style={{ flex: 1 }}>
             <TextInput
                 style={styles.searchBar}
                 placeholder="Search..."
@@ -71,9 +71,8 @@ function WelcomeScreen({ route, navigation }) {
                     ))}
                 </ScrollView>
             </View>
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Featured Lawyers</Text>
-                <ScrollView vertical showsVerticalScrollIndicator={true} style={{flex: 1}}>
+            <View style={styles.featuredLawyersSection}>
+                <Text style={styles.sectionTitle}>Featured Best</Text>  
                 {lawyers && lawyers.length > 0 ? (
                 lawyers.map((lawyer, index) => (
                 <View key={index} style={styles.lawyerCard}>
@@ -88,9 +87,9 @@ function WelcomeScreen({ route, navigation }) {
     ) : (
       <Text>No lawyers found</Text>
     )}
-  </ScrollView>
-</View>
-
+  
+    </View>     
+        </ScrollView>
         </View>
   );
 }
@@ -166,12 +165,21 @@ const styles = StyleSheet.create({
     categoryText: {
         fontSize: 16,
         textAlign: 'center',
+        
     },
+    featuredLawyersSection: {
+    flex: 1,
+    marginBottom: 16,
+    marginTop: 3, // Reduced top margin specifically for this section
+    overflow: 'hidden',
+    //backgroundColor: 'red'
+    
+    },
+
     lawyerCard: {
         flexDirection: 'row',
         padding: 10,
         marginBottom: 10,
-        
         backgroundColor: '#f9f9f9',
         borderRadius: 5,
         shadowColor: '#000',
@@ -181,8 +189,9 @@ const styles = StyleSheet.create({
     },
     lawyerImage: {
         width: 100,
-        height: 100,
-        borderRadius: 50,
+        height:100,
+        borderRadius: 40,
+        overflow: 'hidden',
     },
     lawyerInfo: {
         flex: 1,
